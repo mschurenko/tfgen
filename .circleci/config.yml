@@ -1,0 +1,79 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    environment:
+      VERSION: &version v0.1.0
+    docker:
+      - image: &go_image circleci/golang:1.11.2
+    working_directory: /go/src/github.com/mschurenko/tfgen
+    steps:
+      - checkout
+      - run: mkdir ./workspace
+      - run: GOOS=linux GOARCH=amd64 go build -ldflags "-X cmd.Version=$VERSION" -o workspace/tfgen-linux-${VERSION}
+      - run: GOOS=darwin GOARCH=amd64 go build -ldflags "-X cmd.Version=$VERSION" -o workspace/tfgen-darwin-${VERSION}
+
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - tfgen-*
+  test:
+    environment:
+      VERSION: *version
+      TFGEN_TF_DIR: ./tfgen_test/terraform
+    docker:
+      - image: *go_image
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: mkdir -p ${TFGEN_TF_DIR}/production/test
+      - run:
+          name: "add .tfgen.yml"
+          command: |
+            cat > ${TFGEN_TF_DIR}/.tfgen.yml << EOF
+            ---
+            s3_backend:
+              aws_region: us-west-2
+              bucket: test-bucket
+              dynamodb_table: terraform_statelock
+            environments:
+              - production
+            EOF
+      - run:
+          name: "test init-stack"
+          command: |
+            cd ${TFGEN_TF_DIR}/production/test
+            /home/circleci/project/artifacts/tfgen-linux-${VERSION} init-stack
+      - run:
+          name: "test remote-state"
+          command: |
+            cd ${TFGEN_TF_DIR}/production/test
+            /home/circleci/project/artifacts/tfgen-linux-${VERSION} remote-state production/foo --no-verify-key
+
+  publish-github-release:
+    environment:
+      VERSION: *version
+    docker:
+      - image: *go_image
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "publish github release"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n ${VERSION} -delete ${VERSION} ./artifacts/
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - publish-github-release:
+          requires:
+            - test
