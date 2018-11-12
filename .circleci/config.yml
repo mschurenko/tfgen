@@ -64,7 +64,7 @@ jobs:
           name: "publish github release"
           command: |
             go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n ${VERSION} -delete ${VERSION} ./artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n ${VERSION} -soft ${VERSION} ./artifacts/
 
 workflows:
   version: 2
@@ -75,5 +75,8 @@ workflows:
           requires:
             - build
       - publish-github-release:
+          filters:
+            branches:
+              only: master
           requires:
             - test
