@@ -51,6 +51,7 @@ jobs:
           command: |
             cd ${TFGEN_TF_DIR}/production/test
             /home/circleci/project/artifacts/tfgen-linux-${VERSION} remote-state production/foo --no-verify-key
+            /home/circleci/project/artifacts/tfgen-linux-${VERSION} remote-state production/alb --no-verify-key
 
   publish-github-release:
     environment:
