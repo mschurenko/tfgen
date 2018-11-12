@@ -1,5 +1,6 @@
 # tfgen
 [![release](http://img.shields.io/github/release/mschurenko/tfgen.svg?style=flat-square)](https://github.com/mschurenko/tfgen/releases)
+[![CircleCI](https://circleci.com/gh/mschurenko/tfgen.svg?style=svg)](https://circleci.com/gh/mschurenko/tfgen)
 
 `tfgen` generates some Terraform configurations to make your life easier.
 All generated files are JSON and will have the file extension `.tf.json`.
