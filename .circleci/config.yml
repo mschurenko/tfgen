@@ -12,8 +12,8 @@ jobs:
     steps:
       - checkout
       - run: mkdir ./workspace
-      - run: GOOS=linux GOARCH=amd64 go build -ldflags "-X cmd.Version=$VERSION" -o workspace/tfgen-linux-${VERSION}
-      - run: GOOS=darwin GOARCH=amd64 go build -ldflags "-X cmd.Version=$VERSION" -o workspace/tfgen-darwin-${VERSION}
+      - run: GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/mschurenko/tfgen/cmd.Version=$VERSION" -o workspace/tfgen-linux-${VERSION}
+      - run: GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/mschurenko/tfgen/cmd.Version=$VERSION" -o workspace/tfgen-darwin-${VERSION}
 
       - persist_to_workspace:
           root: workspace
