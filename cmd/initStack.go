@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/mschurenko/tfgen/templates"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // initStackCmd represents the init command
@@ -22,7 +23,7 @@ func init() {
 var forceInitOverride bool
 
 func initStack(cmd *cobra.Command, args []string) {
-	if err := templates.InitStack(s3Config, environments, forceInitOverride); err != nil {
+	if err := templates.InitStack(s3Config, environments, stackRx, forceInitOverride); err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}

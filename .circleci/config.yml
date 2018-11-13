@@ -5,7 +5,7 @@ version: 2
 jobs:
   build:
     environment:
-      VERSION: &version v0.1.1
+      VERSION: &version v0.1.2
     docker:
       - image: &go_image circleci/golang:1.11.2
     working_directory: /go/src/github.com/mschurenko/tfgen
@@ -34,6 +34,7 @@ jobs:
           command: |
             cat > ${TFGEN_TF_DIR}/.tfgen.yml << EOF
             ---
+            stack_regexp: "^([a-z]|[A-Z]|[0-9]|-)+$"
             s3_backend:
               aws_region: us-west-2
               bucket: test-bucket
