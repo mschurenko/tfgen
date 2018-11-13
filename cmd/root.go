@@ -16,6 +16,7 @@ var cfgFile string
 var tfgenConf = ".tfgen.yml"
 var s3Config = make(map[string]string)
 var environments []string
+var stackRx string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -66,7 +67,11 @@ func parseConfig() {
 	}
 
 	// environments
-	eSlice := viper.Get("environments").([]interface{})
+	eSlice, ok := viper.Get("environments").([]interface{})
+	if !ok {
+		fmt.Println("Error: is environments a list?")
+		os.Exit(1)
+	}
 	for _, environment := range eSlice {
 		if s, ok := environment.(string); ok {
 			environments = append(environments, s)
@@ -74,6 +79,13 @@ func parseConfig() {
 			fmt.Println("Error: environments must be strings")
 			os.Exit(1)
 		}
+	}
+
+	// stack_regexp
+	stackRx, ok = viper.Get("stack_regexp").(string)
+	if !ok {
+		fmt.Println("Error: is stack_regexp a string?")
+		os.Exit(1)
 	}
 }
 

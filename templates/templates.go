@@ -143,8 +143,9 @@ func createRemoteState(s3Config map[string]string, stack string, key string) err
 	return nil
 }
 
-func InitStack(s3Config map[string]string, environments []string, force bool) error {
-	path, err := utils.GetStackPath(environments)
+// InitStack sets up s3 backend
+func InitStack(s3Config map[string]string, environments []string, stackRx string, force bool) error {
+	path, err := utils.GetStackPath(stackRx, environments)
 	if err != nil {
 		return err
 	}
@@ -157,6 +158,7 @@ func InitStack(s3Config map[string]string, environments []string, force bool) er
 	return nil
 }
 
+// RemoteState sets up remote state data sources
 func RemoteState(s3Config map[string]string, stackName string, noVerifyKey bool) error {
 	stackNameSafe := utils.ReplaceSlash(stackName)
 

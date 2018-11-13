@@ -46,12 +46,10 @@ func splitPath(path string) []string {
 }
 
 // GetStackPath returns path relative to last environment dir
-func GetStackPath(environments []string) (string, error) {
-	const pat = `^([a-z]|[A-Z]|[0-9]|-)+$`
+func GetStackPath(pat string, environments []string) (string, error) {
 	a := absPath()
 	baseDir := filepath.Base(a)
 
-	// verify stackName
 	matched, err := regexp.MatchString(`^([a-z]|[A-Z]|[0-9]|-)+$`, baseDir)
 	if err != nil {
 		return "", err
@@ -61,7 +59,7 @@ func GetStackPath(environments []string) (string, error) {
 		return "", fmt.Errorf("%v does not match regexp %v", baseDir, pat)
 	}
 
-	dirs := splitPath(absPath())
+	dirs := splitPath(a)
 	foundPaths := []string{}
 
 	for idx, dir := range dirs {
@@ -76,7 +74,7 @@ func GetStackPath(environments []string) (string, error) {
 		return foundPaths[0], nil
 	}
 
-	return "", fmt.Errorf("Error: no paths matched")
+	return "", fmt.Errorf("no paths matched")
 }
 
 // ReplaceSlash replaces "/" with "_"
