@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// this will be set at build time
+// Version will be set at build time
 var Version string
 
 var cfgFile string
-var tfgenConf string = ".tfgen.yml"
+var tfgenConf = ".tfgen.yml"
 var s3Config = make(map[string]string)
 var environments []string
 
@@ -49,6 +49,7 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 
 func parseConfig() {
+	// s3_backend
 	bMap, ok := viper.Get("s3_backend").(map[string]interface{})
 	if !ok {
 		fmt.Println("Error: is s3_backend a map?")
@@ -63,6 +64,8 @@ func parseConfig() {
 		}
 		s3Config[k] = s
 	}
+
+	// environments
 	eSlice := viper.Get("environments").([]interface{})
 	for _, environment := range eSlice {
 		if s, ok := environment.(string); ok {
