@@ -5,7 +5,7 @@ version: 2
 jobs:
   build:
     environment:
-      VERSION: &version v0.1.0
+      VERSION: &version v0.1.1
     docker:
       - image: &go_image circleci/golang:1.11.2
     working_directory: /go/src/github.com/mschurenko/tfgen
