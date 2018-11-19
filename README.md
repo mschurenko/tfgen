@@ -16,6 +16,8 @@ Create a `.tfgen.yml` file somewhere in your Terraform project's path.
 ---
 # terraform s3 remote backend
 # this will be used to generate a `backend.tf.json` for each stack
+stack_regexp: "^([a-z]|[A-Z]|[0-9]|-)+$"
+
 s3_backend:
   aws_region: us-west-2
   bucket: my-terraform-s3-backend-bucket
