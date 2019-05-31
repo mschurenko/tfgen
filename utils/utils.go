@@ -50,7 +50,7 @@ func GetStackPath(pat string, environments []string) (string, error) {
 	a := absPath()
 	baseDir := filepath.Base(a)
 
-	matched, err := regexp.MatchString(`^([a-z]|[A-Z]|[0-9]|-)+$`, baseDir)
+	matched, err := regexp.MatchString(pat, baseDir)
 	if err != nil {
 		return "", err
 	}
