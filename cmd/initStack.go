@@ -23,7 +23,7 @@ func init() {
 var forceInitOverride bool
 
 func initStack(cmd *cobra.Command, args []string) {
-	if err := templates.InitStack(s3Config, environments, stackRx, forceInitOverride); err != nil {
+	if err := templates.InitStack(s3Config, environments, stackRx, reqVer, forceInitOverride); err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}

@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,9 +9,11 @@ import (
 	"github.com/mschurenko/tfgen/utils"
 )
 
-const backendFile = "backend.tf.json"
-const remoteStatesFile = "remote_states.tf.json"
-const stateFileKey = "stacks/%v/terraform.tfstate"
+const (
+	terraformFile    = "terraform.tf.json"
+	remoteStatesFile = "remote_states.tf.json"
+	stateFileKey     = "stacks/%v/terraform.tfstate"
+)
 
 // top-level structs for templates
 type tfDataSource struct {
@@ -27,7 +30,8 @@ type remoteState struct {
 }
 
 type terraform struct {
-	Backend backend `json:"backend"`
+	Backend         backend `json:"backend"`
+	RequiredVersion string  `json:"required_version,omitempty"`
 }
 
 type backend struct {
@@ -45,13 +49,19 @@ type s3 struct {
 func writeFile(file string, d interface{}, force bool) error {
 	fileExists := utils.FileExists(file)
 	if (fileExists && force) || !fileExists {
-		b, err := json.MarshalIndent(d, "", "  ")
+		buf := &bytes.Buffer{}
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		err := enc.Encode(d)
 		if err != nil {
 			return err
 		}
 
+		dst := &bytes.Buffer{}
+		json.Indent(dst, []byte(buf.Bytes()), "", "  ")
+
 		fmt.Println("Creating", file)
-		if err := ioutil.WriteFile(file, b, 0644); err != nil {
+		if err := ioutil.WriteFile(file, dst.Bytes(), 0644); err != nil {
 			return err
 		}
 
@@ -62,9 +72,10 @@ func writeFile(file string, d interface{}, force bool) error {
 	return nil
 }
 
-func createBackend(s3Config map[string]string, path string, force bool) error {
+func createTerraform(s3Config map[string]string, path string, reqVer string, force bool) error {
 	tb := tfBackend{
 		Terraform: terraform{
+			RequiredVersion: reqVer,
 			Backend: backend{
 				S3: s3{
 					Bucket:        s3Config["bucket"],
@@ -77,7 +88,7 @@ func createBackend(s3Config map[string]string, path string, force bool) error {
 		},
 	}
 
-	if err := writeFile(backendFile, tb, force); err != nil {
+	if err := writeFile(terraformFile, tb, force); err != nil {
 		return err
 	}
 
@@ -144,13 +155,13 @@ func createRemoteState(s3Config map[string]string, stack string, key string) err
 }
 
 // InitStack sets up s3 backend
-func InitStack(s3Config map[string]string, environments []string, stackRx string, force bool) error {
+func InitStack(s3Config map[string]string, environments []string, stackRx string, reqVer string, force bool) error {
 	path, err := utils.GetStackPath(stackRx, environments)
 	if err != nil {
 		return err
 	}
 
-	err = createBackend(s3Config, path, force)
+	err = createTerraform(s3Config, path, reqVer, force)
 	if err != nil {
 		return err
 	}

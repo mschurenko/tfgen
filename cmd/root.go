@@ -9,14 +9,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Version will be set at build time
-var Version string
+const tfgenConf = ".tfgen.yml"
 
-var cfgFile string
-var tfgenConf = ".tfgen.yml"
-var s3Config = make(map[string]string)
-var environments []string
-var stackRx string
+var (
+	// Version will be set at build time
+	Version      string
+	cfgFile      string
+	s3Config     = make(map[string]string)
+	environments []string
+	stackRx      string
+	reqVer       string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -86,6 +89,15 @@ func parseConfig() {
 	if !ok {
 		fmt.Println("Error: is stack_regexp a string?")
 		os.Exit(1)
+	}
+
+	// required_version
+	if o := viper.Get("required_version"); o != nil {
+		reqVer, ok = o.(string)
+		if !ok {
+			fmt.Println("Error: is required_version a string?")
+			os.Exit(1)
+		}
 	}
 }
 
